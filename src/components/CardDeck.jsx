@@ -1,0 +1,135 @@
+import { useState, useEffect, useRef } from 'react'
+import RestaurantCard from './RestaurantCard'
+
+function cardTilt(index) {
+  const tilts = [-3, 2, -1.5, 3.5, -2.5, 1, -3.5, 2.5, -1, 3, -2, 1.5]
+  return tilts[index % tilts.length]
+}
+
+// phase flow:
+//   idle          → all face-up, user browses
+//   flipping-down → all flip face-down (700ms flip animation)
+//   shuffling     → shuffle wiggle plays (1200ms)
+//   revealing     → picked card flips face-up (700ms flip animation)
+//   picked        → winner shown, others dimmed
+
+export default function CardDeck({ restaurants, onInfoClick }) {
+  const allIds = () => new Set(restaurants.map((r) => r.id))
+
+  const [flipped, setFlipped] = useState(allIds)   // start face-up
+  const [phase, setPhase] = useState('idle')
+  const [pickedId, setPickedId] = useState(null)
+  const timers = useRef([])
+
+  // Reset to face-up whenever a new search comes in
+  useEffect(() => {
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+    setFlipped(allIds())
+    setPhase('idle')
+    setPickedId(null)
+  }, [restaurants])
+
+  useEffect(() => () => timers.current.forEach(clearTimeout), [])
+
+  function later(fn, ms) {
+    const id = setTimeout(fn, ms)
+    timers.current.push(id)
+  }
+
+  const handleCardClick = (restaurant) => {
+    // Face-up cards in idle/picked state open the detail panel on click
+    if ((phase === 'idle' || phase === 'picked') && flipped.has(restaurant.id)) {
+      onInfoClick?.(restaurant)
+    }
+  }
+
+  const handlePickACard = () => {
+    if (phase === 'shuffling' || phase === 'flipping-down' || phase === 'revealing') return
+
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+
+    // Step 1 — flip everything face-down
+    setPhase('flipping-down')
+    setPickedId(null)
+    setFlipped(new Set())
+
+    // Step 2 — start shuffle wiggle once cards are face-down
+    later(() => setPhase('shuffling'), 700)
+
+    // Step 3 — pick one and flip it up
+    later(() => {
+      const idx = Math.floor(Math.random() * restaurants.length)
+      const picked = restaurants[idx]
+      setPickedId(picked.id)
+      setFlipped(new Set([picked.id]))
+      setPhase('revealing')
+
+      // Step 4 — settle into "picked" state
+      later(() => setPhase('picked'), 750)
+    }, 700 + 1200)
+  }
+
+  const handleDealAgain = () => {
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+    setPhase('idle')
+    setPickedId(null)
+    setFlipped(allIds())
+  }
+
+  const isBusy = phase === 'flipping-down' || phase === 'shuffling' || phase === 'revealing'
+
+  return (
+    <div className="deck-section">
+      <div className="deck-controls">
+        <div className="deck-count">{restaurants.length} restaurants found</div>
+        <div className="deck-actions">
+          {(phase === 'picked') && (
+            <button className="reset-btn" onClick={handleDealAgain}>
+              ↩ Show All
+            </button>
+          )}
+          <button
+            className={`pick-btn ${isBusy ? 'shuffling' : ''}`}
+            onClick={handlePickACard}
+            disabled={isBusy}
+          >
+            {phase === 'idle'                        && '🎴 Pick a Card'}
+            {(phase === 'flipping-down' ||
+              phase === 'shuffling'     ||
+              phase === 'revealing')                 && 'Shuffling…'}
+            {phase === 'picked'                      && '🎴 Pick Again'}
+          </button>
+        </div>
+      </div>
+
+      {phase === 'picked' && pickedId && (
+        <div className="picked-banner">
+          ✨ Tonight you're going to{' '}
+          <strong>{restaurants.find((r) => r.id === pickedId)?.name}</strong>!
+        </div>
+      )}
+
+      {phase === 'idle' && (
+        <p className="deck-hint">Click any card for details · or let fate decide with Pick a Card</p>
+      )}
+
+      <div className={`card-grid ${phase === 'shuffling' ? 'is-shuffling' : ''}`}>
+        {restaurants.map((r, i) => (
+          <RestaurantCard
+            key={r.id}
+            restaurant={r}
+            isFlipped={flipped.has(r.id)}
+            isHighlighted={phase === 'picked' && pickedId === r.id}
+            isDimmed={phase === 'picked' && pickedId !== r.id}
+            style={{ '--tilt': `${cardTilt(i)}deg` }}
+            onClick={() => handleCardClick(r)}
+            onInfoClick={onInfoClick}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
