@@ -1,16 +1,16 @@
-# 🃏 Dinner Decider
+# Dinner Decider
 
 Can't decide where to eat? Let fate choose. Dinner Decider finds nearby restaurants and deals them out as playing cards. Browse the options or hit **Pick a Card** to let the app decide for you.
 
 ## Features
 
-- 📍 Uses your current location or any address / zip code
-- 🥞 Filter by category — All, Breakfast, Lunch, Dinner, or Treat
-- 🚗 Set a max drive time to only see places you can actually get to
-- 💰 Avg cost filter ($ to $$$$) when price data is available
-- 🃏 Restaurants displayed as playing cards — suit assigned by cuisine type
-- 🎴 **Pick a Card** — flips all cards face-down, shuffles, and reveals one winner
-- 📋 Tap any card for address, hours, phone, website, and map links
+- Uses your current location or any address / zip code
+- Filter by category — All, Breakfast, Lunch, Dinner, or Treat
+- Set a max drive time to only see places you can actually get to
+- Avg cost filter ($ to $$$$) when price data is available
+- Restaurants displayed as playing cards — suit assigned by cuisine type
+- **Pick a Card** — flips all cards face-down, shuffles, and reveals one winner
+- Tap any card for address, hours, phone, website, and map links
 - 100% free — no API keys, no sign-up required (powered by OpenStreetMap)
 
 ## Getting Started
