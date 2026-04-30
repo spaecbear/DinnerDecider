@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Green felt background -->
+  <rect width="512" height="512" rx="80" fill="#1a5c2a"/>
+
+  <!-- Card shape -->
+  <rect x="96" y="64" width="320" height="384" rx="24" fill="#faf8f0" stroke="#d0c8b8" stroke-width="4"/>
+
+  <!-- Top-left suit -->
+  <text x="116" y="136" font-family="Georgia,serif" font-size="60" fill="#c0392b">♥</text>
+
+  <!-- Bottom-right suit (rotated) -->
+  <text x="396" y="396" font-family="Georgia,serif" font-size="60" fill="#c0392b" text-anchor="end" transform="rotate(180,396,396) translate(-512,-512) translate(512,512)">♥</text>
+
+  <!-- Center fork and knife -->
+  <!-- Fork handle -->
+  <rect x="220" y="200" width="18" height="100" rx="9" fill="#c9a84c"/>
+  <!-- Fork tines -->
+  <rect x="214" y="156" width="6" height="56" rx="3" fill="#c9a84c"/>
+  <rect x="223" y="156" width="6" height="56" rx="3" fill="#c9a84c"/>
+  <rect x="232" y="156" width="6" height="56" rx="3" fill="#c9a84c"/>
+  <!-- Fork base connector -->
+  <rect x="214" y="208" width="24" height="6" rx="3" fill="#c9a84c"/>
+
+  <!-- Knife handle -->
+  <rect x="274" y="200" width="18" height="100" rx="9" fill="#c9a84c"/>
+  <!-- Knife blade -->
+  <path d="M274 156 Q292 180 292 212 L274 212 Z" fill="#c9a84c"/>
+</svg>
