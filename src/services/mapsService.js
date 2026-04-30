@@ -84,7 +84,11 @@ export async function searchNearbyRestaurants(location, radius, category = 'all'
   const nodes = CATEGORY_NODES[category] ?? CATEGORY_NODES.all
   const query = `[out:json][timeout:30];\n(\n${nodes(around)});\nout body;`
 
-  const res = await fetch('https://overpass-api.de/api/interpreter', {
+  const endpoint = import.meta.env.PROD
+    ? '/api/overpass'
+    : 'https://overpass-api.de/api/interpreter'
+
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `data=${encodeURIComponent(query)}`,
