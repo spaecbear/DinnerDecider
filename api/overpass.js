@@ -1,9 +1,15 @@
+export const config = {
+  api: { bodyParser: false },
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
+  const chunks = []
+  for await (const chunk of req) chunks.push(chunk)
+  const body = Buffer.concat(chunks).toString()
 
   const upstream = await fetch('https://overpass-api.de/api/interpreter', {
     method: 'POST',
