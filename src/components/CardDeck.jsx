@@ -14,12 +14,22 @@ function cardTilt(index) {
 //   revealing     → chosen card flips face-up (700ms flip animation)
 //   picked        → winner shown, others dimmed
 
+function fisherYates(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick }) {
   const allIds = () => new Set(restaurants.map((r) => r.id))
 
   const [flipped, setFlipped] = useState(allIds)   // start face-up
   const [phase, setPhase] = useState('idle')
   const [pickedId, setPickedId] = useState(null)
+  const [displayOrder, setDisplayOrder] = useState(() => [...restaurants])
   const timers = useRef([])
 
   // Reset to face-up whenever a new search comes in
@@ -29,6 +39,7 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
     setFlipped(allIds())
     setPhase('idle')
     setPickedId(null)
+    setDisplayOrder([...restaurants])
   }, [restaurants])
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
@@ -66,8 +77,11 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
     setPickedId(null)
     setFlipped(new Set())
 
-    // Step 2 — start shuffle wiggle once cards are face-down
-    later(() => setPhase('shuffling'), 700)
+    // Step 2 — reorder cards and start shuffle wiggle once face-down
+    later(() => {
+      setDisplayOrder(prev => fisherYates(prev))
+      setPhase('shuffling')
+    }, 700)
 
     // Step 3 — wait for shuffle to finish, then let the user choose
     later(() => setPhase('selecting'), 700 + 1200)
@@ -79,6 +93,7 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
     setPhase('idle')
     setPickedId(null)
     setFlipped(allIds())
+    setDisplayOrder([...restaurants])
   }
 
   const isBusy = phase === 'flipping-down' || phase === 'shuffling' || phase === 'revealing'
@@ -124,7 +139,7 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
       )}
 
       <div className={`card-grid ${phase === 'shuffling' ? 'is-shuffling' : ''} ${phase === 'selecting' ? 'is-selecting' : ''}`}>
-        {restaurants.map((r, i) => (
+        {displayOrder.map((r, i) => (
           <RestaurantCard
             key={r.id}
             restaurant={r}
