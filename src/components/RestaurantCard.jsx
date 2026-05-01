@@ -6,6 +6,8 @@ export default function RestaurantCard({
   style,
   onClick,
   onInfoClick,
+  isFavorite,
+  onFavoriteClick,
 }) {
   const { name, cuisine, address, priceLabel, suit, suitColor } = restaurant
 
@@ -65,14 +67,23 @@ export default function RestaurantCard({
             <div className="corner-suit" style={{ color: suitColor }}>{suit}</div>
           </div>
 
-          {/* Info button — always visible when face-up */}
-          <button
-            className="card-info-btn"
-            title="More details"
-            onClick={(e) => { e.stopPropagation(); onInfoClick?.(restaurant) }}
-          >
-            ℹ
-          </button>
+          {/* Bottom action buttons — always visible when face-up */}
+          <div className="card-bottom-actions">
+            <button
+              className="card-info-btn"
+              title="More details"
+              onClick={(e) => { e.stopPropagation(); onInfoClick?.(restaurant) }}
+            >
+              ℹ
+            </button>
+            <button
+              className={`card-fav-btn${isFavorite ? ' is-favorite' : ''}`}
+              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              onClick={(e) => { e.stopPropagation(); onFavoriteClick?.(restaurant) }}
+            >
+              {isFavorite ? '♥' : '♡'}
+            </button>
+          </div>
 
         </div>
       </div>

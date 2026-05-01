@@ -1,4 +1,4 @@
-export default function CardDetail({ restaurant, onClose }) {
+export default function CardDetail({ restaurant, onClose, isFavorite, onFavoriteClick }) {
   const { name, cuisine, address, phone, website, openingHours, osmUrl, suit, suitColor } = restaurant
 
   return (
@@ -12,7 +12,16 @@ export default function CardDetail({ restaurant, onClose }) {
             <h2 className="detail-name">{name}</h2>
             <div className="detail-cuisine-badge">{cuisine}</div>
           </div>
-          <button className="detail-close" onClick={onClose}>✕</button>
+          <div className="detail-header-actions">
+            <button
+              className={`detail-fav-btn${isFavorite ? ' is-favorite' : ''}`}
+              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              onClick={() => onFavoriteClick?.(restaurant)}
+            >
+              {isFavorite ? '♥' : '♡'}
+            </button>
+            <button className="detail-close" onClick={onClose}>✕</button>
+          </div>
         </div>
 
         {/* Body */}

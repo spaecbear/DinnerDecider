@@ -641,12 +641,19 @@ a:hover { text-decoration: underline; }
   display: none;
 }
 
-/* Info button */
-.card-info-btn {
+/* Card bottom action buttons */
+.card-bottom-actions {
   position: absolute;
   bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.card-info-btn,
+.card-fav-btn {
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -659,9 +666,12 @@ a:hover { text-decoration: underline; }
   align-items: center;
   justify-content: center;
   transition: var(--transition);
-  z-index: 10;
+  flex-shrink: 0;
 }
-.card-info-btn:hover { background: white; color: #1a1a1a; transform: translateX(-50%) scale(1.1); }
+.card-info-btn:hover { background: white; color: #1a1a1a; transform: scale(1.1); }
+.card-fav-btn { color: #ccc; }
+.card-fav-btn:hover { background: white; color: var(--red); transform: scale(1.1); }
+.card-fav-btn.is-favorite { color: var(--red); background: rgba(255,255,255,0.95); }
 
 /* ─────────────────────────────────────────
    Card Detail Modal
@@ -741,9 +751,6 @@ a:hover { text-decoration: underline; }
 }
 
 .detail-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -992,3 +999,91 @@ a:hover { text-decoration: underline; }
   :root { --card-w: 145px; --card-h: 215px; }
   .card-grid { gap: 0.8rem; }
 }
+
+/* ─────────────────────────────────────────
+   Bottom Navigation
+───────────────────────────────────────── */
+.app { padding-bottom: 70px; }
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  background: var(--felt-dark);
+  border-top: 1px solid rgba(201,168,76,0.3);
+  padding: 0.4rem 0 calc(0.4rem + env(safe-area-inset-bottom));
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: none;
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  transition: color 0.2s;
+  font-family: var(--font-card);
+}
+.nav-btn.active { color: var(--gold); }
+.nav-btn-icon { font-size: 1.3rem; line-height: 1; }
+.nav-btn-label { font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* ─────────────────────────────────────────
+   Detail Modal Favorite Button
+───────────────────────────────────────── */
+.detail-header-actions {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.detail-fav-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.detail-fav-btn:hover { background: rgba(255,255,255,0.18); color: var(--red); }
+.detail-fav-btn.is-favorite { color: var(--red); background: rgba(192,57,43,0.15); border-color: rgba(192,57,43,0.3); }
+
+/* ─────────────────────────────────────────
+   Favorites Empty State
+───────────────────────────────────────── */
+.favorites-empty {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  color: rgba(255,255,255,0.45);
+}
+.favorites-empty-icon {
+  font-size: 4rem;
+  line-height: 1;
+  color: rgba(255,255,255,0.15);
+}
+.favorites-empty p { font-style: italic; font-size: 1.05rem; }
+.favorites-empty-hint { font-size: 0.85rem; color: rgba(255,255,255,0.3); }

@@ -13,7 +13,7 @@ function cardTilt(index) {
 //   revealing     → picked card flips face-up (700ms flip animation)
 //   picked        → winner shown, others dimmed
 
-export default function CardDeck({ restaurants, onInfoClick }) {
+export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick }) {
   const allIds = () => new Set(restaurants.map((r) => r.id))
 
   const [flipped, setFlipped] = useState(allIds)   // start face-up
@@ -127,6 +127,8 @@ export default function CardDeck({ restaurants, onInfoClick }) {
             style={{ '--tilt': `${cardTilt(i)}deg` }}
             onClick={() => handleCardClick(r)}
             onInfoClick={onInfoClick}
+            isFavorite={isFavorite?.(r.id)}
+            onFavoriteClick={onFavoriteClick}
           />
         ))}
       </div>
