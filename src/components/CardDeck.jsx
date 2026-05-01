@@ -10,7 +10,8 @@ function cardTilt(index) {
 //   idle          → all face-up, user browses
 //   flipping-down → all flip face-down (700ms flip animation)
 //   shuffling     → shuffle wiggle plays (1200ms)
-//   revealing     → picked card flips face-up (700ms flip animation)
+//   selecting     → all face-down, user taps one to choose
+//   revealing     → chosen card flips face-up (700ms flip animation)
 //   picked        → winner shown, others dimmed
 
 export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick }) {
@@ -38,7 +39,17 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
   }
 
   const handleCardClick = (restaurant) => {
-    // Face-up cards in idle/picked state open the detail panel on click
+    if (phase === 'selecting' && !flipped.has(restaurant.id)) {
+      // User chose a face-down card — reveal it
+      timers.current.forEach(clearTimeout)
+      timers.current = []
+      setPickedId(restaurant.id)
+      setFlipped(new Set([restaurant.id]))
+      setPhase('revealing')
+      later(() => setPhase('picked'), 750)
+      return
+    }
+    // Face-up cards in idle/picked state open the detail panel
     if ((phase === 'idle' || phase === 'picked') && flipped.has(restaurant.id)) {
       onInfoClick?.(restaurant)
     }
@@ -58,17 +69,8 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
     // Step 2 — start shuffle wiggle once cards are face-down
     later(() => setPhase('shuffling'), 700)
 
-    // Step 3 — pick one and flip it up
-    later(() => {
-      const idx = Math.floor(Math.random() * restaurants.length)
-      const picked = restaurants[idx]
-      setPickedId(picked.id)
-      setFlipped(new Set([picked.id]))
-      setPhase('revealing')
-
-      // Step 4 — settle into "picked" state
-      later(() => setPhase('picked'), 750)
-    }, 700 + 1200)
+    // Step 3 — wait for shuffle to finish, then let the user choose
+    later(() => setPhase('selecting'), 700 + 1200)
   }
 
   const handleDealAgain = () => {
@@ -86,7 +88,7 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
       <div className="deck-controls">
         <div className="deck-count">{restaurants.length} restaurants found</div>
         <div className="deck-actions">
-          {(phase === 'picked') && (
+          {(phase === 'picked' || phase === 'selecting') && (
             <button className="reset-btn" onClick={handleDealAgain}>
               ↩ Show All
             </button>
@@ -100,6 +102,7 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
             {(phase === 'flipping-down' ||
               phase === 'shuffling'     ||
               phase === 'revealing')                 && 'Shuffling…'}
+            {phase === 'selecting'                   && '🔀 Shuffle Again'}
             {phase === 'picked'                      && '🎴 Pick Again'}
           </button>
         </div>
@@ -113,10 +116,14 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
       )}
 
       {phase === 'idle' && (
-        <p className="deck-hint">Click any card for details · or let fate decide with Pick a Card</p>
+        <p className="deck-hint">Tap any card for details · or let fate decide with Pick a Card</p>
       )}
 
-      <div className={`card-grid ${phase === 'shuffling' ? 'is-shuffling' : ''}`}>
+      {phase === 'selecting' && (
+        <p className="deck-hint selecting-hint">✨ Choose your card — tap to reveal your dinner destiny</p>
+      )}
+
+      <div className={`card-grid ${phase === 'shuffling' ? 'is-shuffling' : ''} ${phase === 'selecting' ? 'is-selecting' : ''}`}>
         {restaurants.map((r, i) => (
           <RestaurantCard
             key={r.id}
@@ -124,7 +131,8 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
             isFlipped={flipped.has(r.id)}
             isHighlighted={phase === 'picked' && pickedId === r.id}
             isDimmed={phase === 'picked' && pickedId !== r.id}
-            style={{ '--tilt': `${cardTilt(i)}deg` }}
+            isSelectable={phase === 'selecting' && !flipped.has(r.id)}
+            style={{ '--tilt': `${cardTilt(i)}deg`, '--i': i }}
             onClick={() => handleCardClick(r)}
             onInfoClick={onInfoClick}
             isFavorite={isFavorite?.(r.id)}
