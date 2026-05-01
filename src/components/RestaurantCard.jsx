@@ -3,6 +3,7 @@ export default function RestaurantCard({
   isFlipped,
   isHighlighted,
   isDimmed,
+  isSelectable,
   style,
   onClick,
   onInfoClick,
@@ -11,6 +12,12 @@ export default function RestaurantCard({
 }) {
   const { name, cuisine, address, priceLabel, suit, suitColor } = restaurant
 
+  const title = isSelectable
+    ? 'Tap to reveal your fate!'
+    : isFlipped
+    ? 'Tap for more info'
+    : ''
+
   return (
     <div
       className={[
@@ -18,10 +25,11 @@ export default function RestaurantCard({
         isFlipped     ? 'flipped'     : '',
         isHighlighted ? 'highlighted' : '',
         isDimmed      ? 'dimmed'      : '',
+        isSelectable  ? 'selectable'  : '',
       ].join(' ')}
       style={style}
       onClick={onClick}
-      title={isFlipped ? 'Click for more info' : ''}
+      title={title}
     >
       <div className="card-inner">
 
