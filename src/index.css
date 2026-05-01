@@ -570,7 +570,8 @@ a:hover { text-decoration: underline; }
 .card-front-face {
   background: var(--cream);
   border: var(--card-border);
-  transform: rotateY(180deg);
+  /* translateZ(1px) fixes iOS Safari backface-visibility bleed-through bug */
+  transform: rotateY(180deg) translateZ(1px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
