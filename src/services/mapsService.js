@@ -111,7 +111,7 @@ export async function searchNearbyRestaurants(location, radius, category = 'all'
     [results[i], results[j]] = [results[j], results[i]]
   }
 
-  return results.slice(0, 20)
+  return results.slice(0, 15)
 }
 
 // ── Helpers ──────────────────────────────
