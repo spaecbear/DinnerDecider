@@ -688,7 +688,8 @@ a:hover { text-decoration: underline; }
 .card-bottom-actions > * { pointer-events: auto; }
 
 .card-info-btn,
-.card-fav-btn {
+.card-fav-btn,
+.card-discard-btn {
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -707,7 +708,7 @@ a:hover { text-decoration: underline; }
 .card-fav-btn { color: #ccc; }
 .card-fav-btn:hover { background: white; color: var(--red); transform: scale(1.1); }
 .card-fav-btn.is-favorite { color: var(--red); background: rgba(255,255,255,0.95); }
-.card-discard-btn { color: #bbb; font-size: 0.7rem; }
+.card-discard-btn { color: #bbb; font-size: 0.7rem; font-weight: 700; }
 .card-discard-btn:hover { background: white; color: #888; transform: scale(1.1); }
 
 /* ─────────────────────────────────────────
