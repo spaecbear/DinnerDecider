@@ -710,6 +710,8 @@ a:hover { text-decoration: underline; }
 .card-fav-btn.is-favorite { color: var(--red); background: rgba(255,255,255,0.95); }
 .card-discard-btn { color: #bbb; font-size: 0.7rem; font-weight: 700; }
 .card-discard-btn:hover { background: white; color: #888; transform: scale(1.1); }
+.card-restore-btn { color: #b8922a; font-size: 0.85rem; }
+.card-restore-btn:hover { background: white; color: var(--gold); transform: scale(1.1); }
 
 /* ─────────────────────────────────────────
    Card Detail Modal
@@ -1151,122 +1153,26 @@ a:hover { text-decoration: underline; }
 .discards-empty p { font-style: italic; font-size: 1.05rem; }
 .discards-empty-hint { font-size: 0.85rem; color: rgba(255,255,255,0.3); }
 
-.discards-tab {
+.discards-tab-wrapper {
   position: relative;
   z-index: 10;
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 1.5rem 1.5rem 3rem;
 }
 
-.discards-header {
+.discards-tab-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.25rem;
-}
-
-.discards-header-count {
-  font-family: var(--font-card);
-  color: rgba(255,255,255,0.45);
-  font-size: 0.9rem;
-  letter-spacing: 0.05em;
+  justify-content: flex-end;
+  padding: 0.75rem 2rem 0;
 }
 
 .discards-clear-btn {
   padding: 0.4rem 0.9rem;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(201,168,76,0.3);
+  background: rgba(201,168,76,0.08);
+  color: var(--gold);
   font-family: var(--font-body);
   font-size: 0.85rem;
   cursor: pointer;
   transition: var(--transition);
 }
-.discards-clear-btn:hover { background: rgba(255,255,255,0.12); color: var(--cream); }
-
-.discards-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.discard-item {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
-}
-
-.discard-item-suit {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-.discard-item-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.discard-item-name {
-  font-family: var(--font-card);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--cream);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.discard-item-meta {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.4);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.discard-item-actions {
-  display: flex;
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
-
-.discard-restore-btn {
-  padding: 0.35rem 0.7rem;
-  border-radius: 8px;
-  border: 1px solid rgba(201,168,76,0.35);
-  background: rgba(201,168,76,0.08);
-  color: var(--gold);
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: var(--transition);
-  white-space: nowrap;
-}
-.discard-restore-btn:hover { background: rgba(201,168,76,0.18); }
-
-.discard-remove-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.35);
-  font-size: 0.7rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition);
-}
-.discard-remove-btn:hover { background: rgba(192,57,43,0.2); color: #ff8a80; border-color: rgba(192,57,43,0.3); }
+.discards-clear-btn:hover { background: rgba(201,168,76,0.18); }

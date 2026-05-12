@@ -23,7 +23,7 @@ function fisherYates(arr) {
   return a
 }
 
-export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick, onDiscardClick }) {
+export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick, onDiscardClick, onRestoreClick, countLabel = 'restaurants found' }) {
   const allIds = () => new Set(restaurants.map((r) => r.id))
 
   const [flipped, setFlipped] = useState(allIds)   // start face-up
@@ -101,7 +101,7 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
   return (
     <div className="deck-section">
       <div className="deck-controls">
-        <div className="deck-count">{restaurants.length} restaurants found</div>
+        <div className="deck-count">{restaurants.length} {countLabel}</div>
         <div className="deck-actions">
           {(phase === 'picked' || phase === 'selecting') && (
             <button className="reset-btn" onClick={handleDealAgain}>
@@ -153,6 +153,7 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
             isFavorite={isFavorite?.(r.id)}
             onFavoriteClick={onFavoriteClick}
             onDiscardClick={onDiscardClick}
+            onRestoreClick={onRestoreClick}
           />
         ))}
       </div>

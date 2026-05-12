@@ -111,6 +111,9 @@ export default function App() {
       {activeTab === 'discards' && (
         <DiscardsTab
           discards={discards}
+          onInfoClick={setDetailRestaurant}
+          isFavorite={isFavorite}
+          onFavoriteClick={toggleFavorite}
           onRestore={restore}
           onClearAll={clearDiscards}
         />
