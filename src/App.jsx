@@ -3,7 +3,9 @@ import SearchPanel from './components/SearchPanel'
 import CardDeck from './components/CardDeck'
 import CardDetail from './components/CardDetail'
 import FavoritesTab from './components/FavoritesTab'
+import DiscardsTab from './components/DiscardsTab'
 import { useFavorites } from './hooks/useFavorites'
+import { useDiscards } from './hooks/useDiscards'
 import {
   getCurrentLocation,
   geocodeAddress,
@@ -21,6 +23,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('search')
 
   const { favorites, isFavorite, toggleFavorite } = useFavorites()
+  const { discards, isDiscarded, discard, restore, clearDiscards } = useDiscards()
 
   const handleSearch = async ({ useCurrentLocation, locationQuery, maxDriveTime, category, maxPrice }) => {
     setLoading(true)
@@ -40,7 +43,7 @@ export default function App() {
 
       const radius = driveTimeToRadius(maxDriveTime)
       const results = await searchNearbyRestaurants(location, radius, category, maxPrice)
-      setRestaurants(results)
+      setRestaurants(results.filter((r) => !isDiscarded(r.id)))
       setHasSearched(true)
     } catch (e) {
       setSearchError(e.message)
@@ -87,6 +90,10 @@ export default function App() {
               onInfoClick={setDetailRestaurant}
               isFavorite={isFavorite}
               onFavoriteClick={toggleFavorite}
+              onDiscardClick={(r) => {
+                discard(r)
+                setRestaurants((prev) => prev.filter((x) => x.id !== r.id))
+              }}
             />
           )}
         </>
@@ -98,6 +105,15 @@ export default function App() {
           onInfoClick={setDetailRestaurant}
           isFavorite={isFavorite}
           onFavoriteClick={toggleFavorite}
+        />
+      )}
+
+      {activeTab === 'discards' && (
+        <DiscardsTab
+          discards={discards}
+          onRestore={restore}
+          onRemove={restore}
+          onClearAll={clearDiscards}
         />
       )}
 
@@ -126,6 +142,15 @@ export default function App() {
           <span className="nav-btn-icon">{favorites.length > 0 ? '♥' : '♡'}</span>
           <span className="nav-btn-label">
             Favorites{favorites.length > 0 ? ` (${favorites.length})` : ''}
+          </span>
+        </button>
+        <button
+          className={`nav-btn${activeTab === 'discards' ? ' active' : ''}`}
+          onClick={() => setActiveTab('discards')}
+        >
+          <span className="nav-btn-icon">🚫</span>
+          <span className="nav-btn-label">
+            Discards{discards.length > 0 ? ` (${discards.length})` : ''}
           </span>
         </button>
       </nav>

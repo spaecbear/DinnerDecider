@@ -9,6 +9,7 @@ export default function RestaurantCard({
   onInfoClick,
   isFavorite,
   onFavoriteClick,
+  onDiscardClick,
 }) {
   const { name, cuisine, address, priceLabel, suit, suitColor } = restaurant
 
@@ -90,6 +91,13 @@ export default function RestaurantCard({
               onClick={(e) => { e.stopPropagation(); onFavoriteClick?.(restaurant) }}
             >
               {isFavorite ? '♥' : '♡'}
+            </button>
+            <button
+              className="card-discard-btn"
+              title="Discard — hide from future searches"
+              onClick={(e) => { e.stopPropagation(); onDiscardClick?.(restaurant) }}
+            >
+              ✕
             </button>
           </div>
 

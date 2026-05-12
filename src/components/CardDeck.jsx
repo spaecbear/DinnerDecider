@@ -23,7 +23,7 @@ function fisherYates(arr) {
   return a
 }
 
-export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick }) {
+export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick, onDiscardClick }) {
   const allIds = () => new Set(restaurants.map((r) => r.id))
 
   const [flipped, setFlipped] = useState(allIds)   // start face-up
@@ -152,6 +152,7 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
             onInfoClick={onInfoClick}
             isFavorite={isFavorite?.(r.id)}
             onFavoriteClick={onFavoriteClick}
+            onDiscardClick={onDiscardClick}
           />
         ))}
       </div>
