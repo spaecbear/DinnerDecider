@@ -112,7 +112,6 @@ export default function App() {
         <DiscardsTab
           discards={discards}
           onRestore={restore}
-          onRemove={restore}
           onClearAll={clearDiscards}
         />
       )}
@@ -132,14 +131,14 @@ export default function App() {
           className={`nav-btn${activeTab === 'search' ? ' active' : ''}`}
           onClick={() => setActiveTab('search')}
         >
-          <span className="nav-btn-icon">🔍</span>
+          <span className="nav-btn-icon">♣</span>
           <span className="nav-btn-label">Search</span>
         </button>
         <button
           className={`nav-btn${activeTab === 'favorites' ? ' active' : ''}`}
           onClick={() => setActiveTab('favorites')}
         >
-          <span className="nav-btn-icon">{favorites.length > 0 ? '♥' : '♡'}</span>
+          <span className="nav-btn-icon">♥</span>
           <span className="nav-btn-label">
             Favorites{favorites.length > 0 ? ` (${favorites.length})` : ''}
           </span>
@@ -148,7 +147,7 @@ export default function App() {
           className={`nav-btn${activeTab === 'discards' ? ' active' : ''}`}
           onClick={() => setActiveTab('discards')}
         >
-          <span className="nav-btn-icon">🚫</span>
+          <span className="nav-btn-icon">♠</span>
           <span className="nav-btn-label">
             Discards{discards.length > 0 ? ` (${discards.length})` : ''}
           </span>

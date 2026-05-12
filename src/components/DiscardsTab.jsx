@@ -1,4 +1,4 @@
-export default function DiscardsTab({ discards, onRestore, onRemove, onClearAll }) {
+export default function DiscardsTab({ discards, onRestore, onClearAll }) {
   if (discards.length === 0) {
     return (
       <div className="discards-empty">
@@ -35,13 +35,6 @@ export default function DiscardsTab({ discards, onRestore, onRemove, onClearAll 
                 onClick={() => onRestore(r)}
               >
                 ↩ Restore
-              </button>
-              <button
-                className="discard-remove-btn"
-                title="Remove from list"
-                onClick={() => onRemove(r)}
-              >
-                ✕
               </button>
             </div>
           </li>
