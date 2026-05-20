@@ -1,6 +1,5 @@
-// All free, no API key required.
-// Geocoding: Nominatim (OpenStreetMap)
-// Restaurant search: Overpass API (OpenStreetMap)
+// Geocoding: Nominatim (OpenStreetMap) — free, no key required
+// Restaurant search: Foursquare Places API v3 — requires FOURSQUARE_API_KEY server-side
 
 export function getCurrentLocation() {
   return new Promise((resolve, reject) => {
@@ -30,85 +29,52 @@ export async function geocodeAddress(query) {
   }
 }
 
-// 25 mph average city speed ≈ 670 m/min
+// ~15 mph effective straight-line speed (25 mph road speed × ~0.6 road-to-straight-line correction)
 export function driveTimeToRadius(minutes) {
-  return Math.min(Math.round(670 * minutes), 50000)
+  return Math.min(Math.round(400 * minutes), 40000)
 }
 
-// Overpass sub-queries per category
-const CATEGORY_NODES = {
-  all: (a) => `
-    node["amenity"="restaurant"]${a};
-    node["amenity"="cafe"]${a};
-    node["amenity"="fast_food"]${a};
-    node["amenity"="bar"]${a};
-    way["amenity"="restaurant"]${a};
-    way["amenity"="cafe"]${a};
-    way["amenity"="fast_food"]${a};
-  `,
-  breakfast: (a) => `
-    node["amenity"="cafe"]${a};
-    node["amenity"="restaurant"]["cuisine"~"breakfast|brunch|pancake|waffle|crepe",i]${a};
-    node["amenity"="fast_food"]["cuisine"~"breakfast|brunch",i]${a};
-    way["amenity"="cafe"]${a};
-    way["amenity"="restaurant"]["cuisine"~"breakfast|brunch|pancake|waffle|crepe",i]${a};
-  `,
-  lunch: (a) => `
-    node["amenity"="restaurant"]${a};
-    node["amenity"="fast_food"]${a};
-    node["amenity"="cafe"]${a};
-    way["amenity"="restaurant"]${a};
-    way["amenity"="fast_food"]${a};
-    way["amenity"="cafe"]${a};
-  `,
-  dinner: (a) => `
-    node["amenity"="restaurant"]${a};
-    node["amenity"="bar"]["name"]${a};
-    way["amenity"="restaurant"]${a};
-    way["amenity"="bar"]["name"]${a};
-  `,
-  treat: (a) => `
-    node["amenity"="ice_cream"]${a};
-    node["amenity"="cafe"]["cuisine"~"ice_cream|cake|dessert|donut|waffle|crepe|pastry|frozen_yogurt|bubble_tea",i]${a};
-    node["amenity"="fast_food"]["cuisine"~"ice_cream|dessert|donut|frozen_yogurt",i]${a};
-    node["shop"="bakery"]${a};
-    node["shop"="confectionery"]${a};
-    way["amenity"="ice_cream"]${a};
-    way["shop"="bakery"]${a};
-  `,
+// Foursquare category IDs per meal type
+// See: https://docs.foursquare.com/data-products/docs/categories
+const FSQ_CATEGORIES = {
+  all:       '13065,13032,13040',        // Restaurant, Café, Fast Food
+  breakfast: '13072,13032',              // Breakfast Spot, Café
+  lunch:     '13065,13040,13032',        // Restaurant, Fast Food, Café
+  dinner:    '13065',                    // Restaurant
+  treat:     '13035,13046,13002,13032',  // Dessert Shop, Ice Cream Parlor, Bakery, Café
 }
+
+const FSQ_FIELDS = 'fsq_id,name,location,geocodes,categories,price,rating,stats,tel,website'
 
 export async function searchNearbyRestaurants(location, radius, category = 'all', maxPrice = 0) {
   const { lat, lng } = location
-  const around = `(around:${radius},${lat},${lng})`
-  const nodes = CATEGORY_NODES[category] ?? CATEGORY_NODES.all
-  const query = `[out:json][timeout:30];\n(\n${nodes(around)});\nout body;`
 
-  const endpoint = import.meta.env.PROD
-    ? '/api/overpass'
-    : 'https://overpass-api.de/api/interpreter'
-
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `data=${encodeURIComponent(query)}`,
+  const params = new URLSearchParams({
+    ll: `${lat},${lng}`,
+    radius: Math.min(radius, 40000),
+    categories: FSQ_CATEGORIES[category] ?? FSQ_CATEGORIES.all,
+    limit: 50,
+    sort: 'RELEVANCE',
+    fields: FSQ_FIELDS,
   })
-  if (!res.ok) throw new Error('Restaurant search failed. The free Overpass server may be busy — please try again in a moment.')
+
+  // Foursquare price param is comma-separated list of tiers to INCLUDE (1=$ 2=$$ 3=$$$ 4=$$$$)
+  if (maxPrice > 0) {
+    params.set('price', Array.from({ length: maxPrice }, (_, i) => i + 1).join(','))
+  }
+
+  const res = await fetch(`/api/foursquare?${params}`)
+  if (!res.ok) throw new Error('Restaurant search failed. Please try again.')
 
   const data = await res.json()
-  let results = data.elements
-    .map(mapElement)
-    .filter((r) => r.name)
+  if (data.error) throw new Error(data.error)
 
-  // Soft price filter: only exclude results that have price data AND exceed the budget
-  if (maxPrice > 0) {
-    results = results.filter((r) => r.priceLevel === null || r.priceLevel <= maxPrice)
-  }
+  let results = (data.results ?? []).map(mapFoursquareBusiness)
 
   // Shuffle so results aren't always in the same geographic order
   for (let i = results.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [results[i], results[j]] = [results[j], results[i]]
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[results[i], results[j]] = [results[j], results[i]]
   }
 
   return results.slice(0, 20)
@@ -116,34 +82,9 @@ export async function searchNearbyRestaurants(location, radius, category = 'all'
 
 // ── Helpers ──────────────────────────────
 
-function buildAddress(tags) {
-  const parts = []
-  const num = tags['addr:housenumber']
-  const street = tags['addr:street']
-  if (num && street) parts.push(`${num} ${street}`)
-  else if (street) parts.push(street)
-  if (tags['addr:city']) parts.push(tags['addr:city'])
-  if (tags['addr:state']) parts.push(tags['addr:state'])
-  if (tags['addr:postcode']) parts.push(tags['addr:postcode'])
-  return parts.join(', ') || null
-}
-
-function parsePriceLevel(tags) {
-  const raw = tags.price_range || tags['price:range'] || tags['price_range']
-  if (!raw) return null
-  const dollars = (raw.match(/\$/g) || []).length
-  if (dollars > 0) return Math.min(dollars, 4)
-  const lower = raw.toLowerCase()
-  if (/cheap|budget|low|inexpensive/.test(lower)) return 1
-  if (/moderate|medium|mid|average/.test(lower)) return 2
-  if (/expensive|high|upscale/.test(lower)) return 3
-  if (/luxury|very\s*exp|fine\s*dining/.test(lower)) return 4
-  return null
-}
-
 const SUIT_MAP = [
   {
-    keywords: ['japanese', 'sushi', 'chinese', 'thai', 'asian', 'korean', 'vietnamese', 'ramen', 'noodle', 'dim_sum', 'indian', 'curry', 'pho', 'dumpling'],
+    keywords: ['japanese', 'sushi', 'chinese', 'thai', 'asian', 'korean', 'vietnamese', 'ramen', 'noodle', 'dim sum', 'indian', 'curry', 'pho', 'dumpling'],
     suit: '♠', color: '#1a1a2e',
   },
   {
@@ -151,58 +92,53 @@ const SUIT_MAP = [
     suit: '♥', color: '#8b0000',
   },
   {
-    keywords: ['american', 'burger', 'bbq', 'barbecue', 'steak', 'pub', 'diner', 'sandwich', 'wings', 'grill', 'hot_dog', 'sports_bar'],
+    keywords: ['american', 'burger', 'bbq', 'barbecue', 'steak', 'pub', 'diner', 'sandwich', 'wings', 'grill', 'hot dog', 'sports bar'],
     suit: '♦', color: '#8b0000',
   },
   {
-    keywords: ['mexican', 'latin', 'middle_eastern', 'ethiopian', 'african', 'caribbean', 'cafe', 'coffee', 'bakery', 'tacos', 'shawarma', 'falafel', 'ice_cream', 'dessert', 'cake', 'donut', 'waffle', 'crepe', 'breakfast', 'brunch'],
+    keywords: ['mexican', 'latin', 'middle eastern', 'ethiopian', 'african', 'caribbean', 'cafe', 'coffee', 'bakery', 'tacos', 'shawarma', 'falafel', 'ice cream', 'dessert', 'cake', 'donut', 'waffle', 'crepe', 'breakfast', 'brunch'],
     suit: '♣', color: '#1a1a2e',
   },
 ]
 
-function getSuit(cuisine, amenity, shop) {
-  const text = `${cuisine ?? ''} ${amenity ?? ''} ${shop ?? ''}`.toLowerCase()
+function getSuit(categoryName) {
+  const text = (categoryName ?? '').toLowerCase()
   for (const entry of SUIT_MAP) {
     if (entry.keywords.some((k) => text.includes(k))) return { suit: entry.suit, color: entry.color }
   }
   return { suit: '♣', color: '#1a1a2e' }
 }
 
-const AMENITY_LABELS = {
-  restaurant: 'Restaurant',
-  cafe: 'Café',
-  fast_food: 'Fast Food',
-  bar: 'Bar & Grill',
-  ice_cream: 'Ice Cream',
-}
+function mapFoursquareBusiness(biz) {
+  const cat = biz.categories?.[0]
+  const categoryName = cat?.name ?? 'Restaurant'
+  const { suit, color } = getSuit(categoryName)
 
-const SHOP_LABELS = {
-  bakery: 'Bakery',
-  confectionery: 'Sweets',
-}
+  const loc = biz.location ?? {}
+  const addressParts = [loc.address, loc.city, loc.state, loc.postcode].filter(Boolean)
+  const address = addressParts.length > 0 ? addressParts.join(', ') : null
 
-function mapElement(el) {
-  const tags = el.tags || {}
-  const rawCuisine = tags.cuisine?.split(';')[0].replace(/_/g, ' ').trim() ?? null
-  const cuisine = rawCuisine ? rawCuisine.charAt(0).toUpperCase() + rawCuisine.slice(1) : null
-  const amenity = tags.amenity || null
-  const shop = tags.shop || null
-  const { suit, color } = getSuit(rawCuisine, amenity, shop)
-  const priceLevel = parsePriceLevel(tags)
+  const priceLevel = biz.price ?? null  // already 1–4 integer from Foursquare
+  const priceLabel = priceLevel ? '$'.repeat(priceLevel) : null
+
+  // Foursquare rates out of 10; convert to out of 5 for display
+  const rating = biz.rating ? Math.round((biz.rating / 2) * 10) / 10 : null
+  const reviewCount = biz.stats?.total_ratings ?? null
 
   return {
-    id: `${el.type}-${el.id}`,
-    name: tags.name ?? null,
-    cuisine: cuisine ?? AMENITY_LABELS[amenity] ?? SHOP_LABELS[shop] ?? 'Restaurant',
-    address: buildAddress(tags),
-    phone: tags.phone ?? tags['contact:phone'] ?? null,
-    website: tags.website ?? tags['contact:website'] ?? null,
-    openingHours: tags.opening_hours ?? null,
+    id: biz.fsq_id,
+    name: biz.name,
+    cuisine: categoryName,
+    address,
+    phone: biz.tel ?? null,
+    website: biz.website ?? null,
+    openingHours: null,
     priceLevel,
-    priceLabel: priceLevel ? '$'.repeat(priceLevel) : null,
-    lat: el.lat ?? null,
-    lng: el.lon ?? null,
-    osmUrl: `https://www.openstreetmap.org/${el.type}/${el.id}`,
+    priceLabel,
+    rating,
+    reviewCount,
+    lat: biz.geocodes?.main?.latitude ?? null,
+    lng: biz.geocodes?.main?.longitude ?? null,
     suit,
     suitColor: color,
   }
