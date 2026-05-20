@@ -1,0 +1,13 @@
+{
+  "appId": "com.dinnerdecider.app",
+  "appName": "Dinner Decider",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "automatic"
+  },
+  "plugins": {
+    "Geolocation": {
+      "NSLocationWhenInUseUsageDescription": "Dinner Decider uses your location to find restaurants nearby."
+    }
+  }
+}

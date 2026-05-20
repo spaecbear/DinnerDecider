@@ -63,7 +63,8 @@ export async function searchNearbyRestaurants(location, radius, category = 'all'
     params.set('price', Array.from({ length: maxPrice }, (_, i) => i + 1).join(','))
   }
 
-  const res = await fetch(`/api/foursquare?${params}`)
+  const apiBase = import.meta.env.VITE_API_BASE ?? ''
+  const res = await fetch(`${apiBase}/api/foursquare?${params}`)
   if (!res.ok) throw new Error('Restaurant search failed. Please try again.')
 
   const data = await res.json()
