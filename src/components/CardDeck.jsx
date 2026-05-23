@@ -159,6 +159,11 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
           />
         ))}
       </div>
+
+      <p className="fsq-attribution">
+        Powered by{' '}
+        <a href="https://foursquare.com" target="_blank" rel="noreferrer">Foursquare</a>
+      </p>
     </div>
   )
 }

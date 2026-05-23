@@ -149,6 +149,12 @@ export default function SearchPanel({ onSearch, loading }) {
             )}
           </button>
         </form>
+
+        <p className="credits-footer">
+          <a href="https://foursquare.com" target="_blank" rel="noreferrer">Foursquare</a>
+          {' · '}
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a>
+        </p>
       </div>
     </div>
   )
