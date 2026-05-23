@@ -34,10 +34,10 @@ export default function SearchPanel({ onSearch, loading }) {
       <div className="search-panel-inner">
         <h1 className="app-title">
           <span className="suit red">♥</span>
-          Dinner Decider
+          Lucky Table
           <span className="suit red">♦</span>
         </h1>
-        <p className="app-subtitle">Let fate choose your next meal</p>
+        <p className="app-subtitle">Let the cards choose where you eat</p>
 
         <form onSubmit={handleSubmit} className="search-form">
 
