@@ -1178,3 +1178,34 @@ a:hover { text-decoration: underline; }
   transition: var(--transition);
 }
 .discards-clear-btn:hover { background: rgba(201,168,76,0.18); }
+
+/* ─────────────────────────────────────────
+   Attributions & Credits
+───────────────────────────────────────── */
+.fsq-attribution {
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.25);
+  padding: 1rem 0 0.5rem;
+  letter-spacing: 0.04em;
+}
+.fsq-attribution a {
+  color: rgba(255,255,255,0.35);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.fsq-attribution a:hover { color: var(--gold); }
+
+.credits-footer {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.2);
+  margin-top: 1.25rem;
+  letter-spacing: 0.03em;
+}
+.credits-footer a {
+  color: rgba(255,255,255,0.28);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.credits-footer a:hover { color: var(--gold); }
