@@ -1,5 +1,5 @@
 export default function CardDetail({ restaurant, onClose, isFavorite, onFavoriteClick }) {
-  const { name, cuisine, address, phone, website, openingHours, osmUrl, suit, suitColor } = restaurant
+  const { name, cuisine, address, phone, website, rating, reviewCount, suit, suitColor } = restaurant
 
   return (
     <div className="detail-overlay" onClick={onClose}>
@@ -52,22 +52,17 @@ export default function CardDetail({ restaurant, onClose, isFavorite, onFavorite
             </div>
           )}
 
-          {openingHours && (
+          {rating && (
             <div className="detail-section">
-              <h3>🕐 Hours</h3>
-              <p className="hours-raw">{openingHours}</p>
+              <h3>⭐ Rating</h3>
+              <p>{rating} / 5{reviewCount ? ` (${reviewCount.toLocaleString()} reviews)` : ''}</p>
             </div>
           )}
 
-          <div className="detail-section">
-            <h3>🗺 Map</h3>
-            <p>
-              <a href={osmUrl} target="_blank" rel="noreferrer">
-                View on OpenStreetMap ↗
-              </a>
-            </p>
-            {address && (
-              <p style={{ marginTop: '0.35rem' }}>
+          {address && (
+            <div className="detail-section">
+              <h3>🗺 Map</h3>
+              <p>
                 <a
                   href={`https://www.google.com/maps/search/${encodeURIComponent(`${name} ${address}`)}`}
                   target="_blank"
@@ -76,12 +71,12 @@ export default function CardDetail({ restaurant, onClose, isFavorite, onFavorite
                   Search on Google Maps ↗
                 </a>
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
-          {!address && !phone && !website && !openingHours && (
+          {!address && !phone && !website && !rating && (
             <p className="detail-sparse">
-              No additional details available for this location in OpenStreetMap.
+              No additional details available for this location.
             </p>
           )}
 

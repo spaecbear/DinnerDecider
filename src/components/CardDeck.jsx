@@ -23,7 +23,7 @@ function fisherYates(arr) {
   return a
 }
 
-export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick, onDiscardClick, onRestoreClick, countLabel = 'restaurants found' }) {
+export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavoriteClick, onDiscardClick, onRestoreClick, countLabel = 'restaurants found', hidePick = false }) {
   const allIds = () => new Set(restaurants.map((r) => r.id))
 
   const [flipped, setFlipped] = useState(allIds)   // start face-up
@@ -108,18 +108,20 @@ export default function CardDeck({ restaurants, onInfoClick, isFavorite, onFavor
               ↩ Show All
             </button>
           )}
-          <button
-            className={`pick-btn ${isBusy ? 'shuffling' : ''}`}
-            onClick={handlePickACard}
-            disabled={isBusy}
-          >
-            {phase === 'idle'                        && '🎴 Pick a Card'}
-            {(phase === 'flipping-down' ||
-              phase === 'shuffling'     ||
-              phase === 'revealing')                 && 'Shuffling…'}
-            {phase === 'selecting'                   && '🔀 Shuffle Again'}
-            {phase === 'picked'                      && '🎴 Pick Again'}
-          </button>
+          {!hidePick && (
+            <button
+              className={`pick-btn ${isBusy ? 'shuffling' : ''}`}
+              onClick={handlePickACard}
+              disabled={isBusy}
+            >
+              {phase === 'idle'                        && '🎴 Pick a Card'}
+              {(phase === 'flipping-down' ||
+                phase === 'shuffling'     ||
+                phase === 'revealing')                 && 'Shuffling…'}
+              {phase === 'selecting'                   && '🔀 Shuffle Again'}
+              {phase === 'picked'                      && '🎴 Pick Again'}
+            </button>
+          )}
         </div>
       </div>
 
