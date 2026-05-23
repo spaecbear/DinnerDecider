@@ -27,6 +27,7 @@ export default function DiscardsTab({ discards, onInfoClick, isFavorite, onFavor
         onFavoriteClick={onFavoriteClick}
         onRestoreClick={onRestore}
         countLabel="discarded"
+        hidePick
       />
     </div>
   )
