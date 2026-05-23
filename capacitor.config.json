@@ -1,13 +1,13 @@
 {
-  "appId": "com.dinnerdecider.app",
-  "appName": "Dinner Decider",
+  "appId": "com.luckytable.app",
+  "appName": "Lucky Table",
   "webDir": "dist",
   "ios": {
     "contentInset": "automatic"
   },
   "plugins": {
     "Geolocation": {
-      "NSLocationWhenInUseUsageDescription": "Dinner Decider uses your location to find restaurants nearby."
+      "NSLocationWhenInUseUsageDescription": "Lucky Table uses your location to find restaurants nearby."
     }
   }
 }

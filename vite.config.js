@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'icon.svg'],
       manifest: {
-        name: 'Dinner Decider',
-        short_name: 'Dinner',
-        description: 'Find nearby restaurants with a swipe',
+        name: 'Lucky Table',
+        short_name: 'Lucky Table',
+        description: 'Let the cards choose where you eat',
         theme_color: '#1a5c2a',
         background_color: '#12421e',
         display: 'standalone',
