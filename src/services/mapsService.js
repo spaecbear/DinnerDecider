@@ -17,7 +17,7 @@ export function getCurrentLocation() {
 export async function geocodeAddress(query) {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`
   const res = await fetch(url, {
-    headers: { 'Accept-Language': 'en', 'User-Agent': 'DinnerDecider/1.0' },
+    headers: { 'Accept-Language': 'en', 'User-Agent': 'LuckyTable/1.0' },
   })
   if (!res.ok) throw new Error('Geocoding service unavailable. Please try again.')
   const data = await res.json()
@@ -44,7 +44,8 @@ const FSQ_CATEGORIES = {
   treat:     '13035,13046,13002,13032',  // Dessert Shop, Ice Cream Parlor, Bakery, Café
 }
 
-const FSQ_FIELDS = 'fsq_id,name,location,geocodes,categories,price,rating,stats,tel,website'
+// price/rating/stats are premium fields — omit to stay on free tier
+const FSQ_FIELDS = 'fsq_place_id,name,location,latitude,longitude,categories,tel,website'
 
 export async function searchNearbyRestaurants(location, radius, category = 'all', maxPrice = 0) {
   const { lat, lng } = location
@@ -115,31 +116,25 @@ function mapFoursquareBusiness(biz) {
   const categoryName = cat?.name ?? 'Restaurant'
   const { suit, color } = getSuit(categoryName)
 
+  // New API: locality/region instead of city/state, lat/lng at root level
   const loc = biz.location ?? {}
-  const addressParts = [loc.address, loc.city, loc.state, loc.postcode].filter(Boolean)
+  const addressParts = [loc.address, loc.locality, loc.region, loc.postcode].filter(Boolean)
   const address = addressParts.length > 0 ? addressParts.join(', ') : null
 
-  const priceLevel = biz.price ?? null  // already 1–4 integer from Foursquare
-  const priceLabel = priceLevel ? '$'.repeat(priceLevel) : null
-
-  // Foursquare rates out of 10; convert to out of 5 for display
-  const rating = biz.rating ? Math.round((biz.rating / 2) * 10) / 10 : null
-  const reviewCount = biz.stats?.total_ratings ?? null
-
   return {
-    id: biz.fsq_id,
+    id: biz.fsq_place_id,
     name: biz.name,
     cuisine: categoryName,
     address,
     phone: biz.tel ?? null,
     website: biz.website ?? null,
     openingHours: null,
-    priceLevel,
-    priceLabel,
-    rating,
-    reviewCount,
-    lat: biz.geocodes?.main?.latitude ?? null,
-    lng: biz.geocodes?.main?.longitude ?? null,
+    priceLevel: null,
+    priceLabel: null,
+    rating: null,
+    reviewCount: null,
+    lat: biz.latitude ?? null,
+    lng: biz.longitude ?? null,
     suit,
     suitColor: color,
   }
