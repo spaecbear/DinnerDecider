@@ -9,12 +9,13 @@ export default async function handler(req, res) {
   }
 
   const params = new URLSearchParams(req.query)
-  const url = `https://api.foursquare.com/v3/places/search?${params}`
+  const url = `https://places-api.foursquare.com/places/search?${params}`
 
   try {
     const upstream = await fetch(url, {
       headers: {
-        Authorization: apiKey,
+        Authorization: `Bearer ${apiKey}`,
+        'X-Places-Api-Version': '2025-06-17',
         Accept: 'application/json',
       },
       signal: AbortSignal.timeout(15000),
