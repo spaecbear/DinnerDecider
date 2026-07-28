@@ -34,14 +34,37 @@ export function driveTimeToRadius(minutes) {
   return Math.min(Math.round(400 * minutes), 40000)
 }
 
-// Foursquare category IDs per meal type
-// See: https://docs.foursquare.com/data-products/docs/categories
-const FSQ_CATEGORIES = {
-  all:       '13065,13032,13040',        // Restaurant, Café, Fast Food
-  breakfast: '13072,13032',              // Breakfast Spot, Café
-  lunch:     '13065,13040,13032',        // Restaurant, Fast Food, Café
-  dinner:    '13065',                    // Restaurant
-  treat:     '13035,13046,13002,13032',  // Dessert Shop, Ice Cream Parlor, Bakery, Café
+// Foursquare's server-side `categories` param is silently ignored in the current
+// Places API — use `query` to bias results by meal type instead.
+const MEAL_QUERIES = {
+  all:       'restaurant',
+  breakfast: 'breakfast brunch cafe',
+  lunch:     'restaurant',
+  dinner:    'restaurant',
+  treat:     'dessert ice cream bakery',
+}
+
+// Client-side safety net: keywords that identify food/drink venues.
+// Filters out non-food results (parks, shoe stores, libraries, etc.) that slip through.
+const FOOD_WORDS = [
+  'restaurant', 'café', 'cafe', 'bistro', 'diner', 'grill', 'kitchen', 'eatery',
+  'gastropub', 'pub', 'tavern', 'bar', 'lounge', 'brewpub', 'taproom',
+  'pizza', 'pizzeria', 'burger', 'sandwich', 'taco', 'sushi', 'noodle', 'ramen',
+  'steak', 'steakhouse', 'seafood', 'bbq', 'barbecue', 'wings', 'chophouse',
+  'breakfast', 'brunch', 'bakery', 'bagel', 'donut', 'waffle', 'crepe',
+  'dessert', 'ice cream', 'gelato', 'frozen yogurt',
+  'coffee', 'espresso', 'tea', 'juice', 'smoothie',
+  'deli', 'buffet', 'food court', 'food hall',
+  'chinese', 'japanese', 'korean', 'thai', 'vietnamese', 'indian', 'curry',
+  'mexican', 'italian', 'french', 'greek', 'mediterranean', 'spanish',
+  'caribbean', 'cuban', 'latin', 'ethiopian', 'african', 'middle eastern',
+  'kebab', 'shawarma', 'falafel', 'gyro', 'pho', 'dim sum', 'dumpling',
+]
+
+function isFoodVenue(categories) {
+  if (!categories?.length) return false
+  const text = categories.map((c) => (c.name ?? '').toLowerCase()).join(' ')
+  return FOOD_WORDS.some((w) => text.includes(w))
 }
 
 // price/rating/stats are premium fields — omit to stay on free tier
@@ -53,7 +76,7 @@ export async function searchNearbyRestaurants(location, radius, category = 'all'
   const params = new URLSearchParams({
     ll: `${lat},${lng}`,
     radius: Math.min(radius, 40000),
-    categories: FSQ_CATEGORIES[category] ?? FSQ_CATEGORIES.all,
+    query: MEAL_QUERIES[category] ?? MEAL_QUERIES.all,
     limit: 50,
     sort: 'RELEVANCE',
     fields: FSQ_FIELDS,
@@ -71,7 +94,9 @@ export async function searchNearbyRestaurants(location, radius, category = 'all'
   const data = await res.json()
   if (data.error) throw new Error(data.error)
 
-  let results = (data.results ?? []).map(mapFoursquareBusiness)
+  let results = (data.results ?? [])
+    .filter((biz) => isFoodVenue(biz.categories))
+    .map(mapFoursquareBusiness)
 
   // Shuffle so results aren't always in the same geographic order
   for (let i = results.length - 1; i > 0; i--) {
